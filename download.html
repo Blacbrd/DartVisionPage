@@ -80,7 +80,7 @@
             <div class="card" id="card">
                 <h1>Download video</h1>
                 <p id="desc">Tap the button below to download the file.</p>
-                <a id="btn" class="btn" href="#" role="button">Download video</a>
+                <a id="btn" class="btn" href="#" role="button" rel="noopener noreferrer">Download video</a>
                 <small>
                     If tapping doesn't start the download, open this page in your browser
                     or long-press the button and choose "Open in new tab".
@@ -90,7 +90,7 @@
         </div>
 
         <script>
-            // Read ?url=... from query string
+            // Read ?url=... from query string (expected to be the temp.sh page URL)
             const params = new URLSearchParams(window.location.search);
             const url = params.get('url');
 
@@ -108,6 +108,54 @@
                 }
             }
 
+            // Submit a form via POST into a new tab/window so temp.sh receives the POST like its own form button.
+            function postToUrlInNewTab(postUrl) {
+                // Create a form and submit it to a new tab. This is NOT an AJAX request.
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = postUrl;
+                // Use _blank so current page stays where it is and the download happens in the new tab.
+                form.target = '_blank';
+                // temp.sh's page uses an empty POST form, so no inputs required.
+                form.style.display = 'none';
+                document.body.appendChild(form);
+
+                // Submit; because this is in direct response to a user click, popup blockers usually allow it.
+                try {
+                    form.submit();
+                } catch (e) {
+                    // Some browsers might block programmatic submit->new-tab; fallback to opening new window and writing an auto-submit form in it.
+                    try {
+                        const w = window.open('', '_blank', 'noopener');
+                        if (w) {
+                            // Build a small HTML string that assigns a safe JS string for the action.
+                            // JSON.stringify ensures the URL is safely embedded as a JS string literal.
+                            var actionLit = JSON.stringify(postUrl);
+                            var newWindowHtml =
+                                '<!doctype html><html><head><meta charset="utf-8"/></head><body>' +
+                                '<form id="f" method="POST"></form>' +
+                                '<script>' +
+                                'var a = ' + actionLit + ';' +
+                                'document.getElementById("f").action = a;' +
+                                'document.getElementById("f").submit();' +
+                                '<\/script>' +
+                                '</body></html>';
+                            w.document.write(newWindowHtml);
+                            w.document.close();
+                        } else {
+                            // ultimate fallback: navigate current page
+                            window.location.href = postUrl;
+                        }
+                    } catch (inner) {
+                        // fallback to navigating current page (will show temp.sh page)
+                        window.location.href = postUrl;
+                    }
+                } finally {
+                    // cleanup
+                    setTimeout(() => form.remove(), 1000);
+                }
+            }
+
             if (!isLikelyUrl(url)) {
                 // No valid URL provided -> show helpful instruction
                 btn.style.display = 'none';
@@ -116,12 +164,17 @@
                     'Download link missing or invalid. Ask the sender to regenerate the QR code.';
                 desc.textContent = 'No download link found.';
             } else {
-                // Safe-ish: only show link as-is; clicking navigates to the temp.sh URL
-                btn.href = url;
-                // Optional: force target _blank in case user wants to keep the page
-                btn.setAttribute('target', '_blank');
-                // Optional: auto-redirect
-                // setTimeout(() => { window.location.replace(url); }, 3000);
+                // Attach click handler to post to the temp.sh page's form endpoint
+                btn.addEventListener('click', function (ev) {
+                    ev.preventDefault();
+                    // Safety: only allow http/https
+                    if (!isLikelyUrl(url)) {
+                        warn.style.display = 'block';
+                        warn.textContent = 'Invalid download URL.';
+                        return;
+                    }
+                    postToUrlInNewTab(url);
+                });
             }
         </script>
     </body>
