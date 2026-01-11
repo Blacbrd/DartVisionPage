@@ -1,0 +1,128 @@
+/* styles.css - matches PyQt ModeSelection styling */
+
+/* Core palette & layout */
+:root{
+    --bg: #f0f6fb;          /* QWidget background */
+    --text: #153444;        /* QLabel text color */
+    --card: #ffffff;        /* Card background */
+    --accent-from: #006099; /* button left gradient */
+    --accent-to:   #0071b3; /* button right gradient */
+    --hover-from:  #1a8fca;
+    --hover-to:    #0f93d8;
+    --pressed-from:#00557f;
+    --pressed-to:  #006a95;
+    --muted: #666666;
+    --shadow-color: rgba(0,80,120,0.15);
+}
+
+/* Page */
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+}
+
+/* Centering card */
+.wrap{
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+/* White card */
+.card{
+    max-width: 560px;
+    width: 100%;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 32px;
+    text-align: center;
+    box-shadow: 0 14px 40px rgba(2,6,23,0.06);
+    box-sizing: border-box;
+}
+
+/* Heading and text */
+h1 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+}
+
+#desc {
+    color: var(--muted);
+    margin: 0 0 20px;
+    font-size: 15px;
+}
+
+/* Button: gradient, rounded, shadow like QPushButton + QGraphicsDropShadowEffect */
+.btn {
+    display: inline-block;
+    padding: 12px 26px;
+    border-radius: 14px;
+    background-image: linear-gradient(90deg, var(--accent-from), var(--accent-to));
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 16px;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 120ms ease, box-shadow 180ms ease, background-image 120ms ease;
+    /* subtle drop shadow (similar to PyQt's QGraphicsDropShadowEffect) */
+    box-shadow: 0 4px 12px var(--shadow-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hover state */
+.btn:hover,
+.btn:focus {
+    background-image: linear-gradient(90deg, var(--hover-from), var(--hover-to));
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(0,80,120,0.18);
+}
+
+/* Active / pressed */
+.btn:active {
+    background-image: linear-gradient(90deg, var(--pressed-from), var(--pressed-to));
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(0,50,80,0.14);
+}
+
+/* Small help text */
+small {
+    display: block;
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* Warning text */
+.warning {
+    color: #a00;
+    margin-top: 12px;
+    font-size: 13px;
+}
+
+/* Accessibility: remove default anchor focus outline but provide custom visible focus */
+.btn:focus {
+    box-shadow: 0 8px 22px rgba(0,120,190,0.18), 0 0 0 4px rgba(0,120,190,0.06);
+}
+
+/* Responsive tweaks */
+@media (max-width: 480px) {
+    .card { padding: 20px; border-radius: 12px; }
+    .btn { padding: 12px 20px; font-size: 15px; border-radius: 12px; }
+    h1 { font-size: 18px; }
+    .wrap { padding: 16px; }
+}
