@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1"/>
+        <title>Download video</title>
+        <style>
+            :root {
+                --bg: #f6f7fb;
+                --card: #fff;
+                --accent: #111;
+                --muted: #666;
+            }
+
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+                background: var(--bg);
+            }
+
+            .wrap {
+                min-height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+
+            .card {
+                max-width: 480px;
+                width: 100%;
+                background: var(--card);
+                border-radius: 14px;
+                box-shadow: 0 14px 40px rgba(2, 6, 23, 0.08);
+                padding: 32px;
+                text-align: center;
+            }
+
+            h1 {
+                margin: 0 0 8px;
+                font-size: 20px;
+            }
+
+            p {
+                color: var(--muted);
+                margin: 0 0 20px;
+            }
+
+            .btn {
+                display: inline-block;
+                padding: 12px 20px;
+                border-radius: 10px;
+                border: none;
+                background: var(--accent);
+                color: #fff;
+                font-weight: 700;
+                font-size: 16px;
+                cursor: pointer;
+                text-decoration: none;
+            }
+
+            small {
+                display: block;
+                margin-top: 12px;
+                color: var(--muted);
+                font-size: 13px;
+            }
+
+            .warning {
+                color: #a00;
+                margin-top: 12px;
+                font-size: 13px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <div class="card" id="card">
+                <h1>Download video</h1>
+                <p id="desc">Tap the button below to download the file.</p>
+                <a id="btn" class="btn" href="#" role="button">Download video</a>
+                <small>
+                    If tapping doesn't start the download, open this page in your browser
+                    or long-press the button and choose "Open in new tab".
+                </small>
+                <div id="warn" class="warning" style="display:none"></div>
+            </div>
+        </div>
+
+        <script>
+            // Read ?url=... from query string
+            const params = new URLSearchParams(window.location.search);
+            const url = params.get('url');
+
+            const btn = document.getElementById('btn');
+            const warn = document.getElementById('warn');
+            const desc = document.getElementById('desc');
+
+            function isLikelyUrl(u) {
+                if (!u) return false;
+                try {
+                    const parsed = new URL(u);
+                    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            if (!isLikelyUrl(url)) {
+                // No valid URL provided -> show helpful instruction
+                btn.style.display = 'none';
+                warn.style.display = 'block';
+                warn.textContent =
+                    'Download link missing or invalid. Ask the sender to regenerate the QR code.';
+                desc.textContent = 'No download link found.';
+            } else {
+                // Safe-ish: only show link as-is; clicking navigates to the temp.sh URL
+                btn.href = url;
+                // Optional: force target _blank in case user wants to keep the page
+                btn.setAttribute('target', '_blank');
+                // Optional: auto-redirect
+                // setTimeout(() => { window.location.replace(url); }, 3000);
+            }
+        </script>
+    </body>
+</html>
