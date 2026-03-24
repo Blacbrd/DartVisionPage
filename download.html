@@ -12,10 +12,11 @@
                 <h1>Download video</h1>
                 <p id="desc">Tap the button below to download the file.</p>
                 <a id="btn" class="btn" href="#" role="button" rel="noopener noreferrer">Download video</a>
-                <small>
-                    If tapping doesn't start the download, open this page in your browser
-                    or long-press the button and choose "Open in new tab".
+                
+                <small style="color: #666; display: block; margin-top: 15px; font-size: 0.9em; line-height: 1.4;">
+                    <strong>Android Users:</strong> If tapping the button doesn't start the download, tap the <strong>3 dots</strong> in the top right corner and select <strong>"Open in Chrome"</strong> or <strong>"Open in Browser"</strong>.
                 </small>
+                
                 <div id="warn" class="warning" style="display:none"></div>
             </div>
         </div>
@@ -39,50 +40,26 @@
                 }
             }
 
-            // Submit a form via POST into a new tab/window so temp.sh receives the POST like its own form button.
+            // Submit a form via POST in the CURRENT tab. 
+            // Because the server returns a file attachment, the page won't actually navigate away.
             function postToUrlInNewTab(postUrl) {
-                // Create a form and submit it to a new tab. This is NOT an AJAX request.
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = postUrl;
-                // Use _blank so current page stays where it is and the download happens in the new tab.
-                form.target = '_blank';
-                // temp.sh's page uses an empty POST form, so no inputs required.
+                
+                // FIX: Changed from '_blank' to '_self'. 
+                // This prevents Android popup blockers from killing the download.
+                form.target = '_self'; 
                 form.style.display = 'none';
                 document.body.appendChild(form);
 
-                // Submit; because this is in direct response to a user click, popup blockers usually allow it.
                 try {
                     form.submit();
                 } catch (e) {
-                    // Some browsers might block programmatic submit->new-tab; fallback to opening new window and writing an auto-submit form in it.
-                    try {
-                        const w = window.open('', '_blank', 'noopener');
-                        if (w) {
-                            // Build a small HTML string that assigns a safe JS string for the action.
-                            // JSON.stringify ensures the URL is safely embedded as a JS string literal.
-                            var actionLit = JSON.stringify(postUrl);
-                            var newWindowHtml =
-                                '<!doctype html><html><head><meta charset="utf-8"/></head><body>' +
-                                '<form id="f" method="POST"></form>' +
-                                '<script>' +
-                                'var a = ' + actionLit + ';' +
-                                'document.getElementById("f").action = a;' +
-                                'document.getElementById("f").submit();' +
-                                '<\/script>' +
-                                '</body></html>';
-                            w.document.write(newWindowHtml);
-                            w.document.close();
-                        } else {
-                            // ultimate fallback: navigate current page
-                            window.location.href = postUrl;
-                        }
-                    } catch (inner) {
-                        // fallback to navigating current page (will show temp.sh page)
-                        window.location.href = postUrl;
-                    }
+                    // Ultimate fallback: navigate to the URL directly.
+                    // They will see the temp.sh landing page, but they can manually click download.
+                    window.location.href = postUrl;
                 } finally {
-                    // cleanup
                     setTimeout(() => form.remove(), 1000);
                 }
             }
